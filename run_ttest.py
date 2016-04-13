@@ -50,7 +50,7 @@ class Ttest():
                 for d in range(len(self.dur)):
                     npq1 = []
                     npq2 = []
-                    ds = self.db.retrieveDataSets({'specie': self.spec[s],
+                    ds = self.db.retrieve_data_sets({'specie': self.spec[s],
                                               'lightintensity': self.intens[i],
                                               'darkduration': self.dur[d]})
                     for exper in range(len(ds)):
@@ -111,10 +111,10 @@ class Ttest():
         return fig
 
 if __name__ == '__main__':
-    import dataAnalysisPaperData
+    import dataAnalysis
     import matplotlib.pyplot as plt
 
-    db = dataAnalysisPaperData.DB()
+    db = dataAnalysis.DB()
     intens = [100, 300, 900]
     dur = [15, 30, 60]
     spec = ['Arabidopsis', 'Pothos']
@@ -123,5 +123,3 @@ if __name__ == '__main__':
 
     ttest.plotResults()
     plt.show()
-
-
