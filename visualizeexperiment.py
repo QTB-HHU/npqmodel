@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-""" A universal mathematical model of non-photochemical quenching
+""" Universal mathematical model of the non-photochemical quenching
 
 Copyright (C) 2015-2016  Anna Matuszyńska, Oliver Ebenhöh
 
@@ -39,7 +39,7 @@ class VisualizeExperiment(dataAnalysis.DB):
         species:
     """
 
-    def __init__(self,  specie, intensity, duration, dblocation='DataBase/paperdata.db'):
+    def __init__(self,  specie, intensity, duration, dblocation='DataBase/paperdata_new.db'):
         """
         :param specie: name of the specie. Accepts: Arabidopsis, Pothos
         :param intensity: light intensity. Accepts: 100, 300, 900
@@ -64,15 +64,17 @@ class VisualizeExperiment(dataAnalysis.DB):
         if value not in ['Fm', 'Ft', 'T', 'qN', 'NPQ', 'Yield', 'ETR']:
             print 'Not existing value'
         else:
-            x = np.zeros([3, 22])
+            n = len(self.retrieve_data_sets({'specie':self.specie, 'lightintensity':self.intensity, 'darkduration':self.duration}))
+            print n
+            x = np.zeros([n, 22])
             x_avg = np.zeros([1, 22])
             x_sd = np.zeros([1, 22])
 
             ds = self.retrieve_data_sets({'specie': self.specie,
                                           'lightintensity': self.intensity,
                                           'darkduration': self.duration})
-            print ds
-            for exp in range(len(ds)):
+            for exp in range(n):
+            #for exp in range(len(ds)):
                 if value == 'NPQ':
                     # calculate the NPQ value our of the Fm':
                     fluo = getattr(ds[exp], 'Fm')
@@ -143,8 +145,8 @@ class VisualizeExperiment(dataAnalysis.DB):
         axes = self.setGraphics(T, self.ylim)
         axes.set_ylim(0, self.ylim)
 
-        axes.errorbar(T_avg, Fm_avg/Fm_avg[0], Fm_sd, color=self.color[5], linestyle='None', marker='^', label='F_${M}\'$')
-        axes.errorbar(T_avg, Ft_avg/Fm_avg[0], Ft_sd, color=self.color[6], linestyle='None', marker='^', label='F_${t}$')
+        axes.errorbar(T_avg, Fm_avg/Fm_avg[0], Fm_sd, color='k', linestyle='None', marker='^', markersize=8, label='F_${M}\'$')
+        axes.errorbar(T_avg, Ft_avg/Fm_avg[0], Ft_sd, color=self.color[5], linestyle='None', markersize=8, marker='^', label='F_${t}$')
 
         leg = plt.legend(title='Experiment (triplicates)')
         if leg:

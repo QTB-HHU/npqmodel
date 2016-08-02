@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-""" A universal mathematical model of non-photochemical quenching
+""" Universal mathematical model of the non-photochemical quenching
 
 Copyright (C) 2015-2016  Anna Matuszyńska, Oliver Ebenhöh
 
@@ -170,6 +170,7 @@ class NPQModel(object):
         """
         Lp = self.par.PsbStot - L
         Z = self.par.Xtot - V
+        ZAnt = Z / (Z + self.par.kZSat)
         if self.mechanism == 0:
             # simple additive mechanism
             Q = self.par.alpha * Lp + self.par.beta * Z / (Z + self.par.kZSat)
@@ -180,7 +181,6 @@ class NPQModel(object):
                 + self.par.gamma2 * ZAnt * Lp \
                 + self.par.gamma3 * ZAnt * L
         elif self.mechanism == 2:
-            ZAnt = Z / (Z + self.par.kZSat)
             Q = self.par.gamma0 * (1-ZAnt) * L \
                 + self.par.gamma1 * (1-ZAnt) * Lp \
                 + self.par.gamma2 * ZAnt * Lp \

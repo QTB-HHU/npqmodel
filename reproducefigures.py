@@ -2,19 +2,15 @@
 # -*- coding: utf-8 -*-
 
 """ A universal mathematical model of non-photochemical quenching
-
 Copyright (C) 2015-2016  Anna Matuszyńska, Oliver Ebenhöh
-
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
-
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
-
 You should have received a copy of the GNU General Public License
 along with this program (license.txt).  If not, see <http://www.gnu.org/licenses/>.
 """
@@ -62,7 +58,6 @@ class ReproduceFigures():
             plt.close(figure)
         else:
             print("Error in plotting")
-
 
     def flashes(self, v, PFD):
         """
@@ -115,13 +110,13 @@ class ReproduceFigures():
             for l_i in self.light_intens:
 
                 # calculate the averages and sd for each experiment
-                v = visualizeexperiment.VisualizeExperiment(specie, l_i, d_d)
+                v = visualizeexperiment.VisualizeExperiment(specie, l_i, d_d, 'DataBase/paperdata_new.db')
                 T, T_sd = v.getAvgValue('T')
                 Fm, Fm_sd = v.getAvgValue('Fm')
 
                 # For the visual reasons the figure for the manuscript presents only first 5 min of light phases
                 if cut == 'Yes':
-                    cutT = 6
+                    cutT = 7
                 else:
                     cutT = 9
 
@@ -154,13 +149,14 @@ class ReproduceFigures():
         fig.text(0.5, 0.04, 'time [s]', ha='center', fontsize=22)
         fig.text(0.045, 0.5, 'dark duration', va='center', fontsize=22, rotation='vertical')
 
-        self.save_plot(fig, 'Fig1')
+        return fig
+
 
     def fig4(self):
         """
         :return: three plots with PAM traces simulated and measured experimentally
         """
-        timesft = 5    # shift the simulation by an interval to see the experimental points
+        #timesft = 5    # shift the simulation by an interval to see the experimental points
 
         fig = plt.figure(figsize=(17, 5))
         gs = gridspec.GridSpec(1, 3, width_ratios=[1, 1, 1])
@@ -168,7 +164,6 @@ class ReproduceFigures():
         for i in range(len(self.light_intens)):
             ax = plt.subplot(gs[i])
             v = visualizeexperiment.VisualizeExperiment('Arabidopsis', self.light_intens[i], self.dark_dur[i])
-            v.plotFluorescence()
 
             # ===================================================== #
             # read out time of flashes as applied in the experiment #
@@ -188,24 +183,19 @@ class ReproduceFigures():
             T, F, Fmax, Tm, Fm, Ts, Fs, Bst = res.fluo()
 
             # plot the simulation
-            plt.plot(T + timesft, F/max(F), 'orchid', label='simulation')
+            plt.plot(T , F/max(F), 'orchid', label='simulation', linewidth=2)
 
-            # add the legend for the experiment
-            ax = plt.gca()
+            # plot the data points on top of simulation
+            v.plotFluorescence()
+
             T_avg, T_sd = v.getAvgValue('T')
             Fm_avg, Fm_sd = v.getAvgValue('Fm')
-
-            l1 = ax.errorbar(T_avg, Fm_avg/Fm_avg[0], Fm_sd, color='k', linestyle='None', marker='^', label='Fm\'')
-            l3 = plt.Line2D([], [], linewidth=3, color="orchid")
-
-            leg = plt.legend([l1, l3], ["Experiment", "Simulation"])
-            if leg:
-                leg.draggable()
+            Ft_avg, Ft_sd = v.getAvgValue('Ft')
 
             if i == 0:
-                ax.annotate(str(self.light_intens[i]) + ' $\mu$Em$^{-2}$s$^{-1}$', (T_avg[9]/2, 1.05), color='k', weight='bold',
+                ax.annotate(str(self.light_intens[i]) + '$ \mu E m^{-2}s^{-1}$', (T_avg[9]/2, 1.05), color='k', weight='bold',
                             fontsize=16, ha='center', va='center')
-                ax.set_ylabel('Fluorescence ($\mathrm{F_M\'}/\mathrm{F_M}$)',  fontsize=18)
+                ax.set_ylabel('Fluorescence ($\mathrm{F_M\'}/\mathrm{F_M}$)',  fontsize=22)
             else:
                 ax.annotate(str(self.light_intens[i]), (T_avg[9]/2, 1.05), color='k', weight='bold',
                                 fontsize=16, ha='center', va='center')
@@ -218,14 +208,31 @@ class ReproduceFigures():
             elif i ==1:
                 ax.set_xticks([0, 840, 2700, 3000] )
                 ax.set_xticklabels([0, '14', '45', '50'], fontsize=16)
+
+                ax = plt.gca()
+
+                # add the legend for the experiment
+                l1 = ax.errorbar(T_avg, Fm_avg/Fm_avg[0], Fm_sd, color='k', linestyle='None', marker='^', markersize=10, label='Fm\'')
+                l2 = ax.errorbar(T_avg, Ft_avg/Ft_avg[0], Ft_sd, color=self.col[5], linestyle='None', marker='^', markersize=10, label='Fm\'')
+                l3 = plt.Line2D([], [], linewidth=3, color="orchid")
+
+                leg = ax.legend([l1, l2, l3], ["$\mathrm{F_M'}$ measured", "$\mathrm{F_s}$ measured", "Simulated trace"],
+                                loc='upper center', bbox_to_anchor=(0.5, -0.15),
+                                fancybox=True, shadow=True, ncol=3, fontsize=22)
+
+                if leg:
+                    leg.draggable()
+
+
             else:
                 ax.set_xticks([0, 840, 4500, 4800] )
                 ax.set_xticklabels([0, '14', '75', '80'], fontsize=16)
-            ax.set_xlabel('time [min]', fontsize=18)
+            ax.set_xlabel('time [min]', fontsize=20)
+
 
         plt.tight_layout()
 
-        self.save_plot(fig, 'Fig4')
+        return fig
 
     def fig5(self):
         """
@@ -237,35 +244,17 @@ class ReproduceFigures():
         mark = ['x', 'o', 's']
         v = visualizeexperiment.VisualizeExperiment('Arabidopsis', 100, 15)
 
+        # call the model
+        m, y0 = loadspecie.loadspecie('Arabidopsis', 'wt')
+        ss = simulate.Sim(m)
+
         # set up the figure
         fig = plt.figure(figsize=(7, 10))
 
         #make outer gridspec
         outer_grid = gridspec.GridSpec(2, 1, hspace=0.2) # gridspec with two adjacent horizontal cellstwo rows
-        ax = plt.subplot(outer_grid[0])
-        ax.set_ylabel('lumen pH', fontsize=18)
-        ax.set_xlabel('quencher activity [Q]', fontsize=18)
-        ax.set_ylim(3, 8)
-        ax.set_xlim(0.05, 0.4)
-        ax.set_yticks([3,4,5,6,7,8])
-        ax.set_yticklabels(['',4,5,6,7,8], fontsize=14)
-        ax.set_xticks([0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4])
-        ax.set_xticklabels(['','0.1','','0.2','','0.3','','0.4'], fontsize=14)
 
-        # add the steady state
-        m, y0 = loadspecie.loadspecie('Arabidopsis', 'wt')
-        ss = simulate.Sim(m)
-
-        scan = [10, 50, 100, 120, 150, 200, 220, 300, 320, 330, 340, 350, 400, 500, 600, 700, 800, 900, 1000, 1250, 1500]
-        Y = ss.steadyStateLightScan(scan, y0)
-
-        ax.plot(m.quencher(Y[:,3], Y[:,4]), misc.pH(Y[:,1]), c='r', linestyle='-')
-
-        for i in[6, 8, 17]:
-            ax.plot(m.quencher(Y[i,3], Y[i,4]), misc.pH(Y[i,1]), 'o', linestyle='None',
-                markersize=15, mfc='r')
-
-        upper_cell = outer_grid[1]
+        upper_cell = outer_grid[0]
         inner_grid = gridspec.GridSpecFromSubplotSpec(2, 1, upper_cell, hspace=0.0)
 
         # From here we can plot using inner_grid's SubplotSpecs
@@ -287,9 +276,20 @@ class ReproduceFigures():
         ax3.set_xlabel('time [min]', fontsize=18)
         ax3.set_xlim([0,time[-1]])
         ax3.set_xticks(time[1:])
+        ax3.set_ylim(0,0.9)
         ax3.set_xticklabels(['30', '14', '30', '35'], fontsize=14)
-        ax3.set_yticks([0, 0.2, 0.5, 0.8, 1.])
+        ax3.set_yticks([0, 0.2, 0.5, 0.8, .9])
         ax3.set_yticklabels([0, 0.2, 0.5, 0.8, ''], fontsize=14)
+
+        ax = plt.subplot(outer_grid[1])
+        ax.set_ylabel('lumen pH', fontsize=18)
+        ax.set_xlabel('quencher activity [Q]', fontsize=18)
+        ax.set_ylim(3, 8)
+        ax.set_xlim(0.05, 0.4)
+        ax.set_yticks([3,4,5,6,7,8])
+        ax.set_yticklabels(['',4,5,6,7,8], fontsize=14)
+        ax.set_xticks([0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4])
+        ax.set_xticklabels(['','0.1','','0.2','','0.3','','0.4'], fontsize=14)
 
         for i in range(len(PFDs)):
             s = simulate.Sim(m)
@@ -301,20 +301,12 @@ class ReproduceFigures():
             res = npqResults.NPQResults(s)
 
             ax.plot(m.quencher(res.getVar(3), res.getVar(4)), misc.pH(res.getVar(1)), c=color[i],
-                    marker=mark[i], label=str(self.light_intens[i]))
+                    marker=mark[i], label=str(self.light_intens[i]), linewidth=2)
 
-            ax2.plot(res.getT(), misc.pH(res.getVar(1)), c=color[i], label=str(self.light_intens[i]))
+            ax2.plot(res.getT(), misc.pH(res.getVar(1)), c=color[i], label=str(self.light_intens[i]), linewidth=2)
 
-            ax3.plot(res.getT(), 1-res.getVar(3), c=color[i], linestyle='--', label=str(self.light_intens[i]))
-            ax3.plot(res.getT(), 1-res.getVar(4), c=color[i], linestyle='-', label=str(self.light_intens[i]))
-
-        handles, labels = ax.get_legend_handles_labels()
-        leg1 = ax.legend(handles, labels,
-                                      bbox_to_anchor=(0., 1.02, 1., .102), loc=10,
-                                      ncol=1,
-                                      borderaxespad=0.1)
-        if leg1:
-            leg1.draggable()
+            ax3.plot(res.getT(), 1-res.getVar(3), c=color[i], linestyle='--', label=str(self.light_intens[i]), linewidth=2)
+            ax3.plot(res.getT(), 1-res.getVar(4), c=color[i], linestyle='-', label=str(self.light_intens[i]), linewidth=2)
 
         handles, labels = ax3.get_legend_handles_labels()
         leg = ax3.legend([handles[0], handles[2], handles[4], handles[1], handles[3], handles[5]],
@@ -326,7 +318,30 @@ class ReproduceFigures():
         if leg:
             leg.draggable()
 
-        self.save_plot(fig, 'Fig5')
+
+        scan = [10, 50, 100, 120, 150, 200, 220, 300, 320, 330, 340, 350, 400, 500, 600, 700, 800, 900, 1000, 1250, 1500]
+        Y = ss.steadyStateLightScan(scan, y0)
+
+        ax.plot(m.quencher(Y[:,3], Y[:,4]), misc.pH(Y[:,1]), c='r', linestyle='-')
+
+        for i in[6, 8, 17]:
+            ax.plot(m.quencher(Y[i,3], Y[i,4]), misc.pH(Y[i,1]), 'o', linestyle='None',
+                markersize=15, mfc='r')
+
+
+
+        handles, labels = ax.get_legend_handles_labels()
+        leg1 = ax.legend(handles, labels,
+                                      bbox_to_anchor=(0., 1.02, 1., .102), loc=10,
+                                      ncol=1,
+                                      borderaxespad=0.1)
+        if leg1:
+            leg1.draggable()
+
+
+        self.save_plot(fig, 'Fig4')
+
+        return fig
 
     def fig6(self):
         """
@@ -353,15 +368,18 @@ class ReproduceFigures():
         res = npqResults.NPQResults(s)
 
         T, F, Fmax, Tm, Fm, Ts, Fs, Bst = res.fluo()
-        timesft = 20    # shift the simulation by an interval to see the experimental points
-        ax.plot(T + timesft, F/max(F), 'r')
+        timesft = 0    # shift the simulation by an interval to see the experimental points
+        ax.plot(T + timesft, F/max(F), 'r', linewidth=2)
 
         # collect handles to set the legend with experimental results
         T_avg, T_sd = v.getAvgValue('T')
         Fm_avg, Fm_sd = v.getAvgValue('Fm')
+        Ft_avg, Ft_sd = v.getAvgValue('Fm')
 
-        l1 = plt.errorbar(T_avg, Fm_avg/Fm_avg[0], Fm_sd, color=self.col[5],
-                          linestyle='None', marker='^', label='Experiment')
+        l1 = plt.errorbar(T_avg, Fm_avg/Fm_avg[0], Fm_sd, color='k',
+                          linestyle='None', marker='^', markersize=8, label='Experiment')
+        l2 = plt.errorbar(T_avg, Ft_avg/Ft_avg[0], Ft_sd, color=self.col[5],
+                          linestyle='None', marker='^', markersize=8, label='Experiment')
         l3 = plt.Line2D([], [], linewidth=3, color='r')
 
         ax.set_ylabel('Fluorescence (a.u.)', fontsize=18)
@@ -369,7 +387,7 @@ class ReproduceFigures():
         ax.set_xticks([0, 840, 1800, 2100] )
         ax.set_xticklabels([0, '14', '30', '35'])
 
-        leg = plt.legend([l1, l3], ["Experiment", "Simulation"])
+        leg = plt.legend([l1, l2, l3], ["$\mathrm{F_M'}$ measured", "$\mathrm{F_s}$ measured", "Simulated trace"], fontsize=18)
         if leg:
             leg.draggable()
 
@@ -377,20 +395,20 @@ class ReproduceFigures():
         v.setGraphics([-100, 0, 841,1792,2147], 1, yheight=0.1)
 
         ax2.plot(v.getAvgValue('T')[0], (v.getAvgValue('Fm')[0] - v.getAvgValue('Ft')[0]) /v.getAvgValue('Fm')[0],
-                 color=self.col[5], marker='^', label='experiment')
-        ax2.plot(Tm, (Fm - Fs)/Fm, color='r', marker='o', label='simulation')
+                 color=self.col[5], marker='^', markersize=8, linewidth=2, label='Experiment')
+        ax2.plot(Tm, (Fm - Fs)/Fm, color='r', marker='o', markersize=8, linewidth=2, label='Simulation')
         ax2.set_xticks([0, 840, 1800, 2100] )
         ax2.set_xticklabels([0, '14', '30', '35'])
-        ax2.set_xlabel('time [min]', fontsize=16)
-        ax2.set_ylabel('$\Phi$ PSII', fontsize=18)
+        ax2.set_xlabel('time [min]', fontsize=18)
+        ax2.set_ylabel('$\Phi$ PSII', fontsize=20)
 
-        leg = plt.legend()
+        leg = plt.legend(fontsize=18)
         if leg:
             leg.draggable()
 
-        self.save_plot(fig, 'Fig6')
+        return fig
 
-    def figs3(self, dark=[15]):
+    def figs3(self, dark=[15,30,60]):
         """
         :param dark: list of dark duration
         :return: figure with NPQ traces for Arabidopsis and Pothos.
@@ -424,7 +442,7 @@ class ReproduceFigures():
             axes.set_xticks([T_avg[0], T_avg[1], T_avg[9], T_avg[16], T_avg[-1]])
             axes.set_xlim(0, 1.01 * T_avg[-1])
             axes.set_xlabel('time [s]', fontsize=16)
-            axes.set_ylabel(r'NPQ = $\frac{\mathrm{F_M} - \mathrm{F_M}}{\mathrm{F_M}}$', fontsize=16)
+            axes.set_ylabel(r'NPQ', fontsize=18)
 
             # Add the light banner
             v.setGraphics([T_avg[0], T_avg[1], T_avg[9], T_avg[16], T_avg[-1]], 2.7, 0.3)
@@ -468,7 +486,7 @@ class ReproduceFigures():
             ax.set_xticks([1, 2, 3])
             ax.set_xticklabels([100, 300, 900], fontsize=14)
             ax.set_xlim(0, 4)
-            ax.set_ylim(0.7, 1.05)
+            ax.set_ylim(0.6, 1.05)
             ax.set_yticks([0.8, 0.85, 0.9, 0.95, 1.])
             ax.set_yticklabels([0.8,0.85,  0.9, 0.95, 1.], fontsize=14)
             ax.text(0.25, 1.025, textt[l][0], ha="left", va="center", size=15, bbox=self.bbox_props)
@@ -484,36 +502,38 @@ class ReproduceFigures():
         fig.text(0.5, 0.04, 'Illumination intensity($\mu \mathrm{Em}^{-2}\mathrm{s}^{-1}$)', ha='center', fontsize=18)
         plt.show()
 
-        self.save_plot(fig, 'FigS4')
+        return fig
 
-    def figs6(self, PFDs=[0.1, 10, 50, 100, 150, 200, 250, 300, 400, 500, 600, 700, 800, 900, 1000]):
+    def figs6(light=[0.1, 10, 50, 100, 150, 200, 250, 300, 400, 500, 600, 700, 800, 900, 1000]):
         """ returns the steady state fraction of the reduced PQ pool for a given list of different light intensities
             from dim light to high light """
         model, y0 = loadspecie.loadspecie('Arabidopsis', 'wt')
         s = simulate.Sim(model)
+
         # integrate over time
-        Y = s.steadyStateLightScan(PFDs, y0)
+        Y = s.steadyStateLightScan(light, y0)
+
         # visualize results
         fig = plt.figure()
-        ax = plt.subplot(111)
-
-        plt.plot(PFDs, Y[:, 0]/model.par.PQtot, 'sr', linestyle='-', markersize=10)
+        plt.plot(light, Y[:,0]/p.PQtot, 'sr', linestyle='-', markersize=10)
         plt.xlabel('light intensity', fontsize=16)
         plt.ylabel('PQH$_2$/(PQ+PQH$_2$)', fontsize=16)
 
+        ax = gca()
         ax.set_yticks([0, 0.5,1])
         ax.set_yticklabels(['0%','50%','100%'])
         ax.set_xticks([0, 220, 320, 900])
         ax.set_xticklabels(['dim', 100, 300, 900])
 
-        self.save_plot(fig, 'FigS6')
+        return fig
 
-    def figs7(self):
-        """ returns figure with NPQ trace for Arabidopsis WT simulated, measured and simulated npq4 mutant"""
+    def figs8(self):
+        """ returns figure with simulated NPQ trace for Arabidopsis WT and simulated npq4 mutant"""
         fig = plt.figure()
         ax = plt.subplot(111)
+
+        # load flashes time
         v = visualizeexperiment.VisualizeExperiment('Arabidopsis', 900, 15)
-        v.plotNPQ('r')
         light = cpfd.cpfd('Arabidopsis', 900)
         Tfls, PFDs = self.flashes(v, light)
         # ===================================================== #
@@ -526,7 +546,7 @@ class ReproduceFigures():
 
         T, F, Fmax, Tm, Fm, Ts, Fs, Bst = res.fluo()
         timesft = 20    # shift the simulation by an interval to see the experimental points
-        ax.plot(Tm + timesft, (Fm[0] - Fm)/Fm, c=self.col[6], marker='s', linestyle='-', label='wt')
+        ax.plot(Tm + timesft, (Fm[0] - Fm)/Fm, c=self.col[6], marker='s', linestyle='-', label='wt', linewidth=2)
 
         model2, y0 = loadspecie.loadspecie('Arabidopsis', 'npq4')
         s2 = simulate.Sim(model2)
@@ -535,27 +555,30 @@ class ReproduceFigures():
 
         T, F, Fmax, Tm, Fm, Ts, Fs, Bst = res2.fluo()
         timesft = 20    # shift the simulation by an interval to see the experimental points
-        ax.plot(Tm + timesft, (Fm[0] - Fm)/Fm, c=self.col[1], marker='s', linestyle='-', label='npq4')
+        ax.plot(Tm + timesft, (Fm[0] - Fm)/Fm, c=self.col[1], marker='s', linestyle='-', label='npq4', linewidth=2)
 
         # add light banner
-        v.setGraphics([-30, 0, 841,1792,2147], 1.7, yheight=0.2)
+        v.setGraphics([-30, 0, 841,1792,2147], 1.5, yheight=0.2)
 
         handles, labels = ax.get_legend_handles_labels()
-        leg = ax.legend(handles, ['simulated wt', 'simulated npq4', 'measured wt'],
+        leg = ax.legend(handles, ['simulated wt', 'simulated npq4'],
                                   bbox_to_anchor=(0., 1.02, 1., .102), loc=10,
-                                  borderaxespad=0.1)
+                                  borderaxespad=0.1, fontsize=16)
         if leg:
             leg.draggable()
 
         plt.title('')
+        plt.ylabel('NPQ', fontsize=16)
 
-        self.save_plot(fig, 'FigS7')
+        return fig
 
 
 if __name__ == '__main__':
-    r = ReproduceFigures()
 
-    print('Reproduce the first figure of the manuscript. You can move the legend around')
+    r = ReproduceFigures()
     r.fig1b()
+    r.fig4()
+    r.fig5()
+    r.fig6()
 
     plt.show()

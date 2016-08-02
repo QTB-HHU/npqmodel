@@ -2,19 +2,15 @@
 # -*- coding: utf-8 -*-
 
 """ Universal mathematical model of the non-photochemical quenching
-
 Copyright (C) 2015-2016  Anna Matuszyńska, Oliver Ebenhöh
-
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
-
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
-
 You should have received a copy of the GNU General Public License
 along with this program (license.txt).  If not, see <http://www.gnu.org/licenses/>.
 """
@@ -40,7 +36,7 @@ class Ttest():
         self.dur = dur
         self.spec = spec
 
-    def test_f_norm(self):
+    def test_extent(self):
         """
         :return: an array of result of the Ttest performed for
         """
@@ -50,7 +46,7 @@ class Ttest():
                 for d in range(len(self.dur)):
                     npq1 = []
                     npq2 = []
-                    ds = self.db.retrieveDataSets({'specie': self.spec[s],
+                    ds = self.db.retrieve_data_sets({'specie': self.spec[s],
                                               'lightintensity': self.intens[i],
                                               'darkduration': self.dur[d]})
                     for exper in range(len(ds)):
@@ -59,7 +55,28 @@ class Ttest():
                     intensity[s, i, d] = scipy.stats.ttest_rel(npq1, npq2)[1]
         return intensity
 
-    def plotResults(self):
+
+    def test_induction(self):
+        """
+        :return: an array of result of the Ttest performed for
+        """
+        intensity = np.zeros([len(self.spec), len(self.intens), len(self.dur)])
+        for s in range(len(self.spec)):
+            for i in range(len(self.intens)):
+                for d in range(len(self.dur)):
+                    npq1 = []
+                    npq2 = []
+                    ds = self.db.retrieve_data_sets({'specie': self.spec[s],
+                                              'lightintensity': self.intens[i],
+                                              'darkduration': self.dur[d]})
+                    for exper in range(len(ds)):
+                        npq1 = np.hstack([npq1, (ds[exper].Fm[17]-ds[exper].Fm[16])/(ds[exper].T[17]-ds[exper].T[16])])
+                        npq2 = np.hstack([npq2, (ds[exper].Fm[2]-ds[exper].Fm[1])/(ds[exper].T[2]-ds[exper].T[1])])
+                    intensity[s, i, d] = scipy.stats.ttest_rel(npq1, npq2)[1]
+        return intensity
+
+
+    def plotResults(self, test):
         fig = plt.figure()
         gs = gridspec.GridSpec(1, 3, width_ratios=[1, 1, .1], wspace=.1, hspace=0.1)
 
@@ -74,9 +91,15 @@ class Ttest():
         # coloring
         cMap = ListedColormap(['red', 'white'])
 
-        for i in range(len(self.test_f_norm())):
+
+        if test == 'extent':
+            test = self.test_extent()
+        elif test == 'induction':
+            test = self.test_induction()
+
+        for i in range(len(test)):
             ax = plt.subplot(gs[i])
-            pmesh = ax.pcolormesh(x2, y2, self.test_f_norm()[i], vmin=0.00,vmax=0.15, cmap=cMap)
+            pmesh = ax.pcolormesh(x2, y2, test[i], vmin=0.00,vmax=0.1, cmap=cMap)
             plt.title(str(spec[i]))
 
             # set the labels
@@ -88,9 +111,9 @@ class Ttest():
                 plt.setp(ax.get_yticklabels(), visible=False)
 
             # annotate the heat map with the p-values
-            for y in range(self.test_f_norm()[0].shape[0]):
-                for x in range(self.test_f_norm()[0].shape[1]):
-                    plt.text(x + 1, y + 1, '%.4f' % self.test_f_norm()[i, y, x],
+            for y in range(test[0].shape[0]):
+                for x in range(test[0].shape[1]):
+                    plt.text(x + 1, y + 1, '%.4f' % test[i, y, x],
                          horizontalalignment='center',
                          verticalalignment='center',
                          )
@@ -111,17 +134,16 @@ class Ttest():
         return fig
 
 if __name__ == '__main__':
-    import dataAnalysisPaperData
+    import dataAnalysis
     import matplotlib.pyplot as plt
 
-    db = dataAnalysisPaperData.DB()
+    db = dataAnalysis.DB()
     intens = [100, 300, 900]
     dur = [15, 30, 60]
     spec = ['Arabidopsis', 'Pothos']
 
     ttest = Ttest(db, intens, dur, spec)
 
-    ttest.plotResults()
+    ttest.plotResults('extent')
+    ttest.plotResults('induction')
     plt.show()
-
-

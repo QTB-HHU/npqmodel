@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-""" A universal mathematical model of non-photochemical quenching
+""" Universal mathematical model of the non-photochemical quenching
 
 Copyright (C) 2015-2016  Anna Matuszyńska, Oliver Ebenhöh
 
@@ -28,7 +28,7 @@ class DB:
 
     """ Connect to the data base and retrieve single experiment results for further analysis """
 
-    def __init__(self, dblocation='DataBase/paperdata.db'):
+    def __init__(self, dblocation='DataBase/paperdata_new.db'):
         self.conn = sqlite3.connect(dblocation, detect_types=sqlite3.PARSE_DECLTYPES)
         self.cursor = self.conn.cursor()
 
