@@ -9,7 +9,8 @@ parameter space and initial conditions used for the simulations, together with t
 in the corresponding manuscript.
 
 ## Manuscript
-Matuszynska et al.
+Matuszynska et al. (2016). A mathematical model of non-photochemical quenching to study
+short-term light memory in plants. Biochimica et Biophysica Acta 1857:1860–1869
 
 ## Experimental data
 * DataBase/paperdata.db
