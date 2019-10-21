@@ -129,7 +129,7 @@ traitsui==4.4.0
 uniconvertor==2.0
 Unidecode==0.4.16
 urlgrabber==3.10.1
-urllib3==1.10.4
+urllib3==1.24.2
 vboxapi==1.0
 virtualenv==13.1.2
 virtualenv-clone==0.2.6
