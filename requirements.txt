@@ -37,7 +37,7 @@ initial-setup==0.3.31
 ipaddress==1.0.7
 IPy==0.81
 ipython==2.4.1
-Jinja2==2.7.3
+Jinja2==2.11.3
 jsonpointer==1.9
 jsonschema==2.4.0
 keyring==5.0
