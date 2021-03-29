@@ -82,7 +82,7 @@ pydot==1.0.28
 pyface==4.4.0
 pyflakes==0.8.1
 pyglet==1.2.1
-Pygments==1.6
+Pygments==2.7.4
 pygobject==3.16.2
 pygpgme==0.3
 PyIscsi==1.0
