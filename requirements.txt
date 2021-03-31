@@ -46,7 +46,7 @@ langtable==0.0.34
 liveusb-creator==3.14.2
 lockfile==0.10.2
 logilab-common==0.63.2
-lxml==3.3.6
+lxml==4.6.3
 Magic-file-extensions==0.2
 MarkupSafe==0.23
 matplotlib==1.4.3
