@@ -69,7 +69,7 @@ path.py==5.2
 pbr==1.8.0
 pdfshuffler==0.6.0
 pexpect==3.1
-Pillow==2.8.2
+Pillow==8.2.0
 plotly==1.7.7
 ply==3.4
 pp==1.6.0
