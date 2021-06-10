@@ -15,7 +15,7 @@ cryptography==0.9
 cssselect==0.9.1
 decorator==3.4.0
 di==0.3
-Django==1.8.3
+Django==2.2.24
 dnf-langpacks==0.15.1
 dockerfile-parse==0.0.5
 docutils==0.12
