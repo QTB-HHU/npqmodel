@@ -98,7 +98,7 @@ python-bugzilla==1.2.2
 python-dateutil==2.4.2
 python-dmidecode==3.10.13
 python-fedora==0.6.2
-python-ldap==2.4.17
+python-ldap==3.4.0
 python-meh==0.40
 pytz===2012d
 pyudev==0.16.1
